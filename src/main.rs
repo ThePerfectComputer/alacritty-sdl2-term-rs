@@ -5,11 +5,23 @@ use sdl2::ttf::Font;
 use sdl2::video::Window;
 use sdl2::Sdl;
 
-const SCREEN_WIDTH: u32 = 800;
+mod Matrix;
+
+const SCREEN_WIDTH: u32 = 924;
 const SCREEN_HEIGHT: u32 = 600;
-const CELL_WIDTH: u32 = 20;
-const CELL_HEIGHT: u32 = 20;
+const NUM_COLS: u32 = 80;
+const NUM_ROWS: u32 = 24;
+const CELL_WIDTH: u32 = SCREEN_WIDTH/NUM_COLS;
+const CELL_HEIGHT: u32 = SCREEN_HEIGHT/NUM_ROWS;
 const FONT_SIZE: u16 = 16;
+
+// struct TermDisplay {
+//     sdl_context: Sdl,
+//     video_subsystem: sdl2::VideoSubsystem,
+//     ttf_context: sdl2::ttf::Sdl2TtfContext,
+//     font: Font,
+//     window: Window,
+// }
 
 fn main() -> Result<(), String> {
     // Initialize SDL2
@@ -24,7 +36,7 @@ fn main() -> Result<(), String> {
 
     // Create a window
     let window = video_subsystem
-        .window("SDL2 Grid of Characters", SCREEN_WIDTH, SCREEN_HEIGHT)
+        .window("SDL2 Term", SCREEN_WIDTH, SCREEN_HEIGHT)
         .position_centered()
         .build()
         .map_err(|e| e.to_string())?;
@@ -41,8 +53,8 @@ fn main() -> Result<(), String> {
     // Draw the grid
     let texture_creator = canvas.texture_creator();
 
-    for row in 0..(SCREEN_HEIGHT / CELL_HEIGHT) {
-        for col in 0..(SCREEN_WIDTH / CELL_WIDTH) {
+    for row in 0..(NUM_ROWS) {
+        for col in 0..(NUM_COLS) {
             let character = if (row + col) % 2 == 0 { 'A' } else { 'B' };
 
             let surface = font
@@ -55,7 +67,7 @@ fn main() -> Result<(), String> {
                 .map_err(|e| e.to_string())?;
 
             let target = Rect::new(
-                (col * CELL_WIDTH) as i32,
+                ((col+2) * CELL_WIDTH) as i32,
                 (row * CELL_HEIGHT) as i32,
                 CELL_WIDTH,
                 CELL_HEIGHT,
