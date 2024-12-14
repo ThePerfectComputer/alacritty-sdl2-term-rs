@@ -106,6 +106,7 @@ impl TermDisplay {
     }
 
     pub fn run(&mut self) -> Result<(), String> {
+        let mut toggle = false;
         let mut event_pump = self.sdl_context.event_pump()?;
         'running: loop {
             for event in event_pump.poll_iter() {
@@ -115,6 +116,17 @@ impl TermDisplay {
                         keycode: Some(sdl2::keyboard::Keycode::Escape),
                         ..
                     } => break 'running,
+                    sdl2::event::Event::KeyDown { keycode: Some(sdl2::keyboard::Keycode::Space), .. } => {
+                        if toggle {
+                            self.matrix.set_to_content2();
+                        }
+                        else {
+                            self.matrix.set_to_content1();
+                        }
+                        toggle = !toggle;
+                        self.test_render()?;
+                        
+                    }
                     _ => {}
                 }
             }

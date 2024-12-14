@@ -2,9 +2,13 @@
 
 Example codebase demoing implementing a terminal emulator in Rust.
 
+# Status
+Screen content toggles when you press space.
+
 # MacOS
 ```bash
 brew install sdl2 sld2_ttf
+cargo run
 ```
 
 # TODO
