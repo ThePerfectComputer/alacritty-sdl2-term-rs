@@ -16,7 +16,7 @@ const CELL_WIDTH: u32 = SCREEN_WIDTH / NUM_COLS;
 const CELL_HEIGHT: u32 = SCREEN_HEIGHT / NUM_ROWS;
 const FONT_SIZE: u16 = 16;
 
-static CELL: OnceLock<Sdl2TtfContext> = OnceLock::new();
+static SDL2_TTF_CONTEXT: OnceLock<Sdl2TtfContext> = OnceLock::new();
 
 pub struct TermDisplay {
     sdl_context: Sdl,
@@ -33,7 +33,7 @@ impl TermDisplay {
         let sdl_context = sdl2::init()?;
         let video_subsystem = sdl_context.video()?;
 
-        let ttf_context = CELL.get_or_init(|| {
+        let ttf_context = SDL2_TTF_CONTEXT.get_or_init(|| {
             let ttf_context = sdl2::ttf::init().unwrap();
             ttf_context
         });

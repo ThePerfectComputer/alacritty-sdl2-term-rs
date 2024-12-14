@@ -7,6 +7,9 @@ edition = "2021"
 pkg-config = "0.3"
 bindgen = "0.64"  # Adjust to the latest version
 
+[dependencies]
+nix = { version = "0.29", features = ["process", "term"] }
+
 [dependencies.sdl2]
 version = "0.37.0"
 default-features = false

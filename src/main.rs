@@ -1,6 +1,9 @@
+#![allow(non_camel_case_types)]
+
 mod Matrix;
 mod TestVars;
 mod TermDisplay;
+mod VTerm;
 
 
 fn main() -> Result<(), String> {
