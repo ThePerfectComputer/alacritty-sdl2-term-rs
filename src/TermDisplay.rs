@@ -6,6 +6,8 @@ use sdl2::video::Window;
 use sdl2::Sdl;
 use std::sync::OnceLock;
 
+use crate::Matrix::Matrix;
+
 const SCREEN_WIDTH: u32 = 924;
 const SCREEN_HEIGHT: u32 = 600;
 const NUM_COLS: u32 = 80;
@@ -22,6 +24,7 @@ pub struct TermDisplay {
     ttf_context: &'static Sdl2TtfContext,
     font: Font<'static, 'static>,
     canvas: Canvas<Window>,
+    matrix: Matrix
 }
 
 impl TermDisplay {
@@ -35,7 +38,9 @@ impl TermDisplay {
             ttf_context
         });
         let font = ttf_context
-                .load_font("/System/Library/Fonts/Supplemental/Courier New.ttf", FONT_SIZE)
+                .load_font(
+                    "/System/Library/Fonts/Supplemental/Courier New.ttf",
+                    FONT_SIZE)
                 .map_err(|e| e.to_string())?;
 
         // Create a window
@@ -50,6 +55,8 @@ impl TermDisplay {
             .present_vsync()
             .build()
             .map_err(|e| e.to_string())?;
+        let mut matrix = Matrix::new(NUM_ROWS, NUM_COLS);
+        matrix.set_to_content2();
 
         Ok(TermDisplay {
             sdl_context,
@@ -57,6 +64,7 @@ impl TermDisplay {
             ttf_context,
             font,
             canvas,
+            matrix
             }
         )
     }
@@ -69,7 +77,8 @@ impl TermDisplay {
 
         for row in 0..NUM_ROWS {
             for col in 0..NUM_COLS {
-                let character = if (row + col) % 2 == 0 { 'A' } else { 'B' };
+                let character = self.matrix.content[row as usize][col as usize]
+                    .map_or(' ', |c| c);
 
                 let surface = self
                     .font

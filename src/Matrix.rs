@@ -1,8 +1,9 @@
+use crate::TestVars::{CONTENT1,CONTENT2};
 // data structure for terminal display
 pub struct Matrix {
     rows: u32,
     cols: u32,
-    content: Vec<Vec<Option<char>>>,
+    pub content: Vec<Vec<Option<char>>>,
 }
 
 impl Matrix {
@@ -15,24 +16,42 @@ impl Matrix {
             content,
         }
     }
+
     pub fn populate_from_string(&mut self, input: &str) {
-        let mut row_idx = 0; // Track the current row index
-        let mut col_idx = 0; // Track the current column index
-
-        for c in input.chars() {
-            if row_idx >= self.rows as usize {
-                break; // Stop if we've run out of rows
-            }
-
-            if c == '\n' {
-                // Handle newline: move to the next row
-                row_idx += 1;
-                col_idx = 0; // Reset column index
-            } else if col_idx < self.cols as usize {
-                // Populate the current cell
-                self.content[row_idx][col_idx] = Some(c);
-                col_idx += 1;
+        let mut chars = input.chars().peekable();
+        
+        for row in self.content.iter_mut() {
+            let mut hit_newline = false;
+            for col in row.iter_mut() {
+                if hit_newline {
+                    *col = None;
+                }
+                else {
+                    match chars.peek() {
+                        Some(&'\n') => {
+                            *col = None;
+                            chars.next();
+                            hit_newline = true;
+                        },
+                        Some(&c) => {
+                            *col = Some(c);
+                            chars.next();
+                        },
+                        None => {
+                            *col = None;
+                        },
+                    }
+                }
             }
         }
     }
+
+    pub fn set_to_content1(&mut self) {
+        self.populate_from_string(CONTENT1);
+    }
+
+    pub fn set_to_content2(&mut self) {
+        self.populate_from_string(CONTENT2);
+    }
+
 }
