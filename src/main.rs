@@ -2,6 +2,8 @@
 
 use std::sync::OnceLock;
 
+use alacritty_terminal::event::Notify;
+use alacritty_terminal::term;
 use sdl2::event::EventPollIterator;
 use TermDisplay::Update;
 
@@ -16,9 +18,19 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use std::cell::RefCell;
 
+
+// use once_cell::sync::Lazy;
+use lazy_static::lazy_static;
+use std::sync::Mutex;
+
 // Use thread_local for single-threaded mutable access
 thread_local! {
     static TOGGLE: RefCell<bool> = RefCell::new(false);
+}
+
+// Use thread_local for single-threaded mutable access
+lazy_static! {
+    static ref ATERM: Mutex<ATerm::ATerm> = Mutex::new(ATerm::ATerm::new().expect("Failed to initialize ATerm"));
 }
 
 fn update_loop(events: EventPollIterator) -> Update {
@@ -37,19 +49,11 @@ fn update_loop(events: EventPollIterator) -> Update {
                 keycode: Some(Keycode::Space),
                 ..
             } => {
-                update = TOGGLE.with(|toggle| {
-                    let mut toggle_ref = toggle.borrow_mut();
-                    *toggle_ref = !*toggle_ref;
-
-                    let mut matrix = Matrix::Matrix::new(24, 80);
-                    if *toggle_ref {
-                        matrix.set_to_content2();
-                    } else {
-                        matrix.set_to_content1();
-                    }
-
-                    Update::MatrixContent(matrix)
-                });
+                let mut aterm = ATERM.lock().unwrap();
+                aterm.tx.notify("date\n".to_string().into_bytes());
+                let mut matrix = Matrix::Matrix::new(24, 80);
+                matrix.populate_from_aterm(&aterm);
+                update = Update::MatrixContent(matrix);
                 break;
             }
             _ => {

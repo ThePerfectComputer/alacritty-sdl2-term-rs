@@ -622,6 +622,7 @@ version = "0.1.0"
 dependencies = [
  "alacritty_terminal",
  "bindgen",
+ "lazy_static",
  "nix",
  "pkg-config",
  "sdl2",
