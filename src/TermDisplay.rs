@@ -1,3 +1,4 @@
+use sdl2::event::EventPollIterator;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::Canvas;
@@ -25,6 +26,11 @@ pub struct TermDisplay {
     font: Font<'static, 'static>,
     canvas: Canvas<Window>,
     matrix: Matrix
+}
+
+pub enum Update {
+    MatrixContent(Matrix),
+    Exit
 }
 
 impl TermDisplay {
@@ -105,7 +111,44 @@ impl TermDisplay {
         Ok(())
     }
 
+    pub fn display_matrix(&mut self, matrix : &Matrix) -> Result<(), String> {
+        self.canvas.set_draw_color(Color::BLACK);
+        self.canvas.clear();
+
+        let texture_creator = self.canvas.texture_creator();
+
+        for row in 0..NUM_ROWS {
+            for col in 0..NUM_COLS {
+                let character = matrix.content[row as usize][col as usize]
+                    .map_or(' ', |c| c);
+
+                let surface = self
+                    .font
+                    .render(&character.to_string())
+                    .blended(Color::WHITE)
+                    .map_err(|e| e.to_string())?;
+
+                let texture = texture_creator
+                    .create_texture_from_surface(&surface)
+                    .map_err(|e| e.to_string())?;
+
+                let target = Rect::new(
+                    (col * CELL_WIDTH) as i32,
+                    (row * CELL_HEIGHT) as i32,
+                    CELL_WIDTH,
+                    CELL_HEIGHT,
+                );
+
+                self.canvas.copy(&texture, None, target)?;
+            }
+        }
+
+        self.canvas.present();
+        Ok(())
+    }
+
     pub fn run(&mut self) -> Result<(), String> {
+        self.test_render()?;
         let mut toggle = false;
         let mut event_pump = self.sdl_context.event_pump()?;
         'running: loop {
@@ -129,6 +172,23 @@ impl TermDisplay {
                     }
                     _ => {}
                 }
+            }
+        }
+        Ok(())
+    }
+    pub fn update_loop(
+        &mut self, 
+        update_fn : fn(event : &EventPollIterator) -> Update
+    ) -> Result<(), String> {
+        let mut event_pump = self.sdl_context.event_pump()?;
+        'running: loop {
+            let updated_matrix = update_fn(&event_pump.poll_iter());
+            match updated_matrix {
+                Update::MatrixContent(matrix) => 
+                {
+                    self.display_matrix(&matrix)?;
+                },
+                Update::Exit => break 'running
             }
         }
         Ok(())
