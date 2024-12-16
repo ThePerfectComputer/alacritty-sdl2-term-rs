@@ -30,6 +30,7 @@ pub struct TermDisplay {
 
 pub enum Update {
     MatrixContent(Matrix),
+    Nothing,
     Exit
 }
 
@@ -75,42 +76,6 @@ impl TermDisplay {
         )
     }
 
-    pub fn test_render(&mut self) -> Result<(), String> {
-        self.canvas.set_draw_color(Color::BLACK);
-        self.canvas.clear();
-
-        let texture_creator = self.canvas.texture_creator();
-
-        for row in 0..NUM_ROWS {
-            for col in 0..NUM_COLS {
-                let character = self.matrix.content[row as usize][col as usize]
-                    .map_or(' ', |c| c);
-
-                let surface = self
-                    .font
-                    .render(&character.to_string())
-                    .blended(Color::WHITE)
-                    .map_err(|e| e.to_string())?;
-
-                let texture = texture_creator
-                    .create_texture_from_surface(&surface)
-                    .map_err(|e| e.to_string())?;
-
-                let target = Rect::new(
-                    (col * CELL_WIDTH) as i32,
-                    (row * CELL_HEIGHT) as i32,
-                    CELL_WIDTH,
-                    CELL_HEIGHT,
-                );
-
-                self.canvas.copy(&texture, None, target)?;
-            }
-        }
-
-        self.canvas.present();
-        Ok(())
-    }
-
     pub fn display_matrix(&mut self, matrix : &Matrix) -> Result<(), String> {
         self.canvas.set_draw_color(Color::BLACK);
         self.canvas.clear();
@@ -147,48 +112,23 @@ impl TermDisplay {
         Ok(())
     }
 
-    pub fn run(&mut self) -> Result<(), String> {
-        self.test_render()?;
-        let mut toggle = false;
-        let mut event_pump = self.sdl_context.event_pump()?;
-        'running: loop {
-            for event in event_pump.poll_iter() {
-                match event {
-                    sdl2::event::Event::Quit { .. }
-                    | sdl2::event::Event::KeyDown {
-                        keycode: Some(sdl2::keyboard::Keycode::Escape),
-                        ..
-                    } => break 'running,
-                    sdl2::event::Event::KeyDown { keycode: Some(sdl2::keyboard::Keycode::Space), .. } => {
-                        if toggle {
-                            self.matrix.set_to_content2();
-                        }
-                        else {
-                            self.matrix.set_to_content1();
-                        }
-                        toggle = !toggle;
-                        self.test_render()?;
-                        
-                    }
-                    _ => {}
-                }
-            }
-        }
-        Ok(())
-    }
     pub fn update_loop(
         &mut self, 
-        update_fn : fn(event : &EventPollIterator) -> Update
+        update_fn : fn(event : EventPollIterator) -> Update
     ) -> Result<(), String> {
         let mut event_pump = self.sdl_context.event_pump()?;
         'running: loop {
-            let updated_matrix = update_fn(&event_pump.poll_iter());
+            let updated_matrix = update_fn(event_pump.poll_iter());
             match updated_matrix {
                 Update::MatrixContent(matrix) => 
                 {
                     self.display_matrix(&matrix)?;
                 },
-                Update::Exit => break 'running
+                Update::Exit => 
+                { 
+                    break 'running
+                },
+                Update::Nothing => {}
             }
         }
         Ok(())
