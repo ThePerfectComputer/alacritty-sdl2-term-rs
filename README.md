@@ -15,3 +15,5 @@ cargo run
 
  - [ ] Matrix to SDL display
  - [ ] quick re-render of SDL every x seconds
+ - [ ] Remove VTerm dependency once I have successfully
+       demonstrated basic ATerm in SDL2.

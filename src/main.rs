@@ -4,6 +4,8 @@ mod Matrix;
 mod TestVars;
 mod TermDisplay;
 mod VTerm;
+mod ATerm;
+mod TerminalSize;
 
 
 fn main() -> Result<(), String> {
