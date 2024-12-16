@@ -38,19 +38,23 @@ fn update_loop(events: EventPollIterator) -> Update {
 
     for event in events {
         match event {
-            Event::Quit { .. }
-            | Event::KeyDown {
-                keycode: Some(Keycode::Escape),
-                ..
-            } => {
+            Event::Quit { .. } | Event::KeyDown {keycode: Some(Keycode::Escape),..} => {
                 update = Update::Exit;
             }
-            Event::KeyDown {
-                keycode: Some(Keycode::Space),
-                ..
-            } => {
+            Event::KeyDown {keycode: Some(Keycode::KpEnter), ..} |
+            Event::KeyDown {keycode: Some(Keycode::KP_ENTER), ..} |
+            Event::KeyDown {keycode: Some(Keycode::Return), ..}
+            => {
                 let mut aterm = ATERM.lock().unwrap();
-                aterm.tx.notify("date\n".to_string().into_bytes());
+                aterm.tx.notify("\n".to_string().into_bytes());
+                let mut matrix = Matrix::Matrix::new(24, 80);
+                matrix.populate_from_aterm(&aterm);
+                update = Update::MatrixContent(matrix);
+                break;
+            }
+            Event::TextInput {text, ..} => {
+                let mut aterm = ATERM.lock().unwrap();
+                aterm.tx.notify(text.into_bytes());
                 let mut matrix = Matrix::Matrix::new(24, 80);
                 matrix.populate_from_aterm(&aterm);
                 update = Update::MatrixContent(matrix);
