@@ -33,6 +33,19 @@ lazy_static! {
     static ref ATERM: Mutex<ATerm::ATerm> = Mutex::new(ATerm::ATerm::new().expect("Failed to initialize ATerm"));
 }
 
+fn check_for_term_update() -> Update {
+    let aterm = ATERM.lock().unwrap();
+    let has_updates = aterm.rx.try_recv().is_ok();
+
+    if has_updates {
+        let mut matrix = Matrix::Matrix::new(24, 80);
+        matrix.populate_from_aterm(&aterm);
+        Update::MatrixContent(matrix)
+    } else {
+        Update::Nothing
+    }
+}
+
 fn update_loop(events: EventPollIterator) -> Update {
     let mut update = Update::Nothing;
 
@@ -41,7 +54,7 @@ fn update_loop(events: EventPollIterator) -> Update {
             Event::Quit { .. } | Event::KeyDown {keycode: Some(Keycode::Escape),..} => {
                 update = Update::Exit;
             }
-            Event::KeyDown {keycode: Some(Keycode::KpEnter), ..} |
+            Event::KeyDown {keycode: Some(Keycode::KpEnter), ..}  |
             Event::KeyDown {keycode: Some(Keycode::KP_ENTER), ..} |
             Event::KeyDown {keycode: Some(Keycode::Return), ..}
             => {
@@ -73,6 +86,6 @@ fn update_loop(events: EventPollIterator) -> Update {
 fn main() -> Result<(), String> {
     let mut term_display = TermDisplay::TermDisplay::new()?;
     // let mut term = ATerm::ATerm::new();
-    term_display.update_loop(update_loop)?;
+    term_display.update_loop(update_loop, check_for_term_update)?;
     Ok(())
 }

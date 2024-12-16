@@ -114,7 +114,8 @@ impl TermDisplay {
 
     pub fn update_loop(
         &mut self, 
-        update_fn : fn(event : EventPollIterator) -> Update
+        update_fn : fn(event : EventPollIterator) -> Update,
+        has_updates : fn() -> Update
     ) -> Result<(), String> {
         let mut event_pump = self.sdl_context.event_pump()?;
         'running: loop {
@@ -128,7 +129,16 @@ impl TermDisplay {
                 { 
                     break 'running
                 },
-                Update::Nothing => {}
+                Update::Nothing => {
+                    let has_updates = has_updates();
+                    match has_updates {
+                        Update::MatrixContent(matrix) => 
+                        {
+                            self.display_matrix(&matrix)?;
+                        },
+                        _ => {}
+                    }
+                }
             }
         }
         Ok(())
