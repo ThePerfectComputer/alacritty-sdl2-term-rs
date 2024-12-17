@@ -1,8 +1,6 @@
-use alacritty_terminal::index::{Column, Direction, Line, Point, Side};
-use alacritty_terminal::event::{
-    Event, EventListener, Notify, OnResize, WindowSize,
-};
+use alacritty_terminal::event::{Event, EventListener, Notify, OnResize, WindowSize};
 use alacritty_terminal::grid::{Dimensions, Scroll};
+use alacritty_terminal::index::{Column, Direction, Line, Point, Side};
 
 #[derive(Clone, Copy, Debug)]
 pub struct TerminalSize {

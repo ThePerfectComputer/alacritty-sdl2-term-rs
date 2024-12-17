@@ -25,13 +25,13 @@ pub struct TermDisplay {
     ttf_context: &'static Sdl2TtfContext,
     font: Font<'static, 'static>,
     canvas: Canvas<Window>,
-    matrix: Matrix
+    matrix: Matrix,
 }
 
 pub enum Update {
     MatrixContent(Matrix),
     Nothing,
-    Exit
+    Exit,
 }
 
 impl TermDisplay {
@@ -45,10 +45,11 @@ impl TermDisplay {
             ttf_context
         });
         let font = ttf_context
-                .load_font(
-                    "/System/Library/Fonts/Supplemental/Courier New.ttf",
-                    FONT_SIZE)
-                .map_err(|e| e.to_string())?;
+            .load_font(
+                "/System/Library/Fonts/Supplemental/Courier New.ttf",
+                FONT_SIZE,
+            )
+            .map_err(|e| e.to_string())?;
 
         // Create a window
         let window = video_subsystem
@@ -71,12 +72,11 @@ impl TermDisplay {
             ttf_context,
             font,
             canvas,
-            matrix
-            }
-        )
+            matrix,
+        })
     }
 
-    pub fn display_matrix(&mut self, matrix : &Matrix) -> Result<(), String> {
+    pub fn display_matrix(&mut self, matrix: &Matrix) -> Result<(), String> {
         self.canvas.set_draw_color(Color::BLACK);
         self.canvas.clear();
 
@@ -84,8 +84,7 @@ impl TermDisplay {
 
         for row in 0..NUM_ROWS {
             for col in 0..NUM_COLS {
-                let character = matrix.content[row as usize][col as usize]
-                    .map_or(' ', |c| c);
+                let character = matrix.content[row as usize][col as usize].map_or(' ', |c| c);
 
                 let surface = self
                     .font
@@ -113,29 +112,24 @@ impl TermDisplay {
     }
 
     pub fn update_loop(
-        &mut self, 
-        update_fn : fn(event : EventPollIterator) -> Update,
-        has_updates : fn() -> Update
+        &mut self,
+        update_fn: fn(event: EventPollIterator) -> Update,
+        has_updates: fn() -> Update,
     ) -> Result<(), String> {
         let mut event_pump = self.sdl_context.event_pump()?;
         'running: loop {
             let updated_matrix = update_fn(event_pump.poll_iter());
             match updated_matrix {
-                Update::MatrixContent(matrix) => 
-                {
+                Update::MatrixContent(matrix) => {
                     self.display_matrix(&matrix)?;
-                },
-                Update::Exit => 
-                { 
-                    break 'running
-                },
+                }
+                Update::Exit => break 'running,
                 Update::Nothing => {
                     let has_updates = has_updates();
                     match has_updates {
-                        Update::MatrixContent(matrix) => 
-                        {
+                        Update::MatrixContent(matrix) => {
                             self.display_matrix(&matrix)?;
-                        },
+                        }
                         _ => {}
                     }
                 }

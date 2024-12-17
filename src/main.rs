@@ -7,11 +7,11 @@ use alacritty_terminal::term;
 use sdl2::event::EventPollIterator;
 use TermDisplay::Update;
 
-mod Matrix;
-mod TestVars;
-mod TermDisplay;
 mod ATerm;
+mod Matrix;
+mod TermDisplay;
 mod TerminalSize;
+mod TestVars;
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -28,7 +28,8 @@ thread_local! {
 
 // Use thread_local for single-threaded mutable access
 lazy_static! {
-    static ref ATERM: Mutex<ATerm::ATerm> = Mutex::new(ATerm::ATerm::new().expect("Failed to initialize ATerm"));
+    static ref ATERM: Mutex<ATerm::ATerm> =
+        Mutex::new(ATerm::ATerm::new().expect("Failed to initialize ATerm"));
 }
 
 fn convert_keycode(keycode: Keycode) -> Option<char> {
@@ -102,11 +103,21 @@ fn update_loop(events: EventPollIterator) -> Update {
 
     for event in collected_events {
         match event {
-            Event::Quit { .. } => { update = Update::Exit; }
-            Event::KeyDown {keycode: Some(Keycode::KpEnter), ..}  |
-            Event::KeyDown {keycode: Some(Keycode::KP_ENTER), ..} |
-            Event::KeyDown {keycode: Some(Keycode::Return), ..}
-            => {
+            Event::Quit { .. } => {
+                update = Update::Exit;
+            }
+            Event::KeyDown {
+                keycode: Some(Keycode::KpEnter),
+                ..
+            }
+            | Event::KeyDown {
+                keycode: Some(Keycode::KP_ENTER),
+                ..
+            }
+            | Event::KeyDown {
+                keycode: Some(Keycode::Return),
+                ..
+            } => {
                 let mut aterm = ATERM.lock().unwrap();
                 aterm.tx.notify("\n".to_string().into_bytes());
                 let mut matrix = Matrix::Matrix::new(24, 80);
@@ -114,7 +125,10 @@ fn update_loop(events: EventPollIterator) -> Update {
                 update = Update::MatrixContent(matrix);
                 break;
             }
-            Event::KeyDown {keycode: Some(Keycode::Backspace), ..} => {
+            Event::KeyDown {
+                keycode: Some(Keycode::Backspace),
+                ..
+            } => {
                 let backspace = "\x08".to_string();
                 let mut aterm = ATERM.lock().unwrap();
                 aterm.tx.notify(backspace.into_bytes());
@@ -123,7 +137,10 @@ fn update_loop(events: EventPollIterator) -> Update {
                 update = Update::MatrixContent(matrix);
                 break;
             }
-            Event::KeyDown {keycode: Some(Keycode::Escape), ..} => {
+            Event::KeyDown {
+                keycode: Some(Keycode::Escape),
+                ..
+            } => {
                 let backspace = "\x1B".to_string();
                 let mut aterm = ATERM.lock().unwrap();
                 aterm.tx.notify(backspace.into_bytes());
@@ -132,7 +149,7 @@ fn update_loop(events: EventPollIterator) -> Update {
                 update = Update::MatrixContent(matrix);
                 break;
             }
-            Event::TextInput {text, ..} => {
+            Event::TextInput { text, .. } => {
                 let mut aterm = ATERM.lock().unwrap();
                 aterm.tx.notify(text.into_bytes());
                 let mut matrix = Matrix::Matrix::new(24, 80);
@@ -140,7 +157,11 @@ fn update_loop(events: EventPollIterator) -> Update {
                 update = Update::MatrixContent(matrix);
                 break;
             }
-            Event::KeyDown { keycode: Some(key), keymod, .. } => {
+            Event::KeyDown {
+                keycode: Some(key),
+                keymod,
+                ..
+            } => {
                 if keymod.contains(sdl2::keyboard::Mod::LCTRLMOD) {
                     if let Some(key_char) = convert_keycode(key) {
                         if key_char >= 'A' && key_char <= 'Z' {
@@ -152,7 +173,6 @@ fn update_loop(events: EventPollIterator) -> Update {
                             matrix.populate_from_aterm(&aterm);
                             update = Update::MatrixContent(matrix);
                             break;
-                            
                         }
                     }
                 }
@@ -165,7 +185,6 @@ fn update_loop(events: EventPollIterator) -> Update {
 
     update
 }
-
 
 fn main() -> Result<(), String> {
     let mut term_display = TermDisplay::TermDisplay::new()?;
