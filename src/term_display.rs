@@ -7,7 +7,7 @@ use sdl2::video::Window;
 use sdl2::Sdl;
 use std::sync::OnceLock;
 
-use crate::Matrix::Matrix;
+use crate::matrix::Matrix;
 
 const SCREEN_WIDTH: u32 = 924;
 const SCREEN_HEIGHT: u32 = 600;
@@ -60,7 +60,6 @@ impl TermDisplay {
             .present_vsync()
             .build()
             .map_err(|e| e.to_string())?;
-        let mut matrix = Matrix::new(NUM_ROWS, NUM_COLS);
 
         Ok(TermDisplay {
             sdl_context,

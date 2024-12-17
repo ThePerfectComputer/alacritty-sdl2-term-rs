@@ -1,4 +1,4 @@
-use crate::ATerm::ATerm;
+use crate::aterm::ATerm;
 // data structure for terminal display
 pub struct Matrix {
     rows: u32,
@@ -34,34 +34,6 @@ impl Matrix {
             let y = indexed.point.line.0 as usize;
             if y < self.rows as usize && x < self.cols as usize {
                 self.content[y][x] = Some(indexed.c);
-            }
-        }
-    }
-
-    pub fn populate_from_string(&mut self, input: &str) {
-        let mut chars = input.chars().peekable();
-
-        for row in self.content.iter_mut() {
-            let mut hit_newline = false;
-            for col in row.iter_mut() {
-                if hit_newline {
-                    *col = None;
-                } else {
-                    match chars.peek() {
-                        Some(&'\n') => {
-                            *col = None;
-                            chars.next();
-                            hit_newline = true;
-                        }
-                        Some(&c) => {
-                            *col = Some(c);
-                            chars.next();
-                        }
-                        None => {
-                            *col = None;
-                        }
-                    }
-                }
             }
         }
     }

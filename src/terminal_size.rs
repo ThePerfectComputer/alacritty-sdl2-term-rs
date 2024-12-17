@@ -8,7 +8,6 @@ pub struct TerminalSize {
     pub cell_height: u16,
     pub num_cols: u16,
     pub num_lines: u16,
-    // layout_size: Size,
 }
 
 impl Default for TerminalSize {
@@ -18,7 +17,6 @@ impl Default for TerminalSize {
             cell_height: 1,
             num_cols: 80,
             num_lines: 24,
-            // layout_size: Size::default(),
         }
     }
 }

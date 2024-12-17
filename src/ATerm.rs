@@ -1,13 +1,13 @@
 use std::result;
 use std::sync::{mpsc, Arc};
 
-use alacritty_terminal::event::{Event, EventListener, WindowSize};
+use alacritty_terminal::event::{Event, EventListener};
 use alacritty_terminal::event_loop::{EventLoop, Notifier};
 use alacritty_terminal::sync::FairMutex;
 use alacritty_terminal::term::{self, Term};
 use alacritty_terminal::tty;
 
-use crate::TerminalSize;
+use crate::terminal_size;
 
 #[derive(Clone)]
 pub struct EventProxy(mpsc::Sender<Event>);
@@ -38,17 +38,11 @@ impl ATerm {
             ..tty::Options::default()
         };
         let config = term::Config::default();
-        let window_size = WindowSize {
-            num_lines: 80,
-            num_cols: 24,
-            cell_width: 8,
-            cell_height: 16,
-        };
-        let terminal_size = TerminalSize::TerminalSize::default();
+        let terminal_size = terminal_size::TerminalSize::default();
         let pty = tty::new(&pty_config, terminal_size.into(), id)?;
         let (event_sender, event_receiver) = mpsc::channel();
         let event_proxy = EventProxy(event_sender);
-        let term = Term::new::<TerminalSize::TerminalSize>(
+        let term = Term::new::<terminal_size::TerminalSize>(
             config,
             &terminal_size.into(),
             event_proxy.clone(),

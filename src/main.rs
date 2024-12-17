@@ -2,18 +2,17 @@
 
 use alacritty_terminal::event::Notify;
 use sdl2::event::EventPollIterator;
-use TermDisplay::Update;
+use term_display::Update;
 
-mod ATerm;
-mod Matrix;
-mod TermDisplay;
-mod TerminalSize;
+mod aterm;
+mod matrix;
+mod term_display;
+mod terminal_size;
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use std::cell::RefCell;
 
-// use once_cell::sync::Lazy;
 use lazy_static::lazy_static;
 use std::sync::Mutex;
 
@@ -24,8 +23,8 @@ thread_local! {
 
 // Use thread_local for single-threaded mutable access
 lazy_static! {
-    static ref ATERM: Mutex<ATerm::ATerm> =
-        Mutex::new(ATerm::ATerm::new().expect("Failed to initialize ATerm"));
+    static ref ATERM: Mutex<aterm::ATerm> =
+        Mutex::new(aterm::ATerm::new().expect("Failed to initialize ATerm"));
 }
 
 fn convert_keycode(keycode: Keycode) -> Option<char> {
@@ -80,7 +79,7 @@ fn check_for_term_update() -> Update {
     let has_updates = aterm.rx.try_recv().is_ok();
 
     if has_updates {
-        let mut matrix = Matrix::Matrix::new(24, 80);
+        let mut matrix = matrix::Matrix::new(24, 80);
         matrix.populate_from_aterm(&aterm);
         Update::MatrixContent(matrix)
     } else {
@@ -93,10 +92,6 @@ fn update_loop(events: EventPollIterator) -> Update {
 
     let collected_events: Vec<Event> = events.collect();
 
-    // for event in &collected_events {
-    //     dbg!(event);
-    // }
-
     for event in collected_events {
         match event {
             Event::Quit { .. } => {
@@ -107,16 +102,12 @@ fn update_loop(events: EventPollIterator) -> Update {
                 ..
             }
             | Event::KeyDown {
-                keycode: Some(Keycode::KP_ENTER),
-                ..
-            }
-            | Event::KeyDown {
                 keycode: Some(Keycode::Return),
                 ..
             } => {
-                let mut aterm = ATERM.lock().unwrap();
+                let aterm = ATERM.lock().unwrap();
                 aterm.tx.notify("\n".to_string().into_bytes());
-                let mut matrix = Matrix::Matrix::new(24, 80);
+                let mut matrix = matrix::Matrix::new(24, 80);
                 matrix.populate_from_aterm(&aterm);
                 update = Update::MatrixContent(matrix);
                 break;
@@ -126,9 +117,9 @@ fn update_loop(events: EventPollIterator) -> Update {
                 ..
             } => {
                 let backspace = "\x08".to_string();
-                let mut aterm = ATERM.lock().unwrap();
+                let aterm = ATERM.lock().unwrap();
                 aterm.tx.notify(backspace.into_bytes());
-                let mut matrix = Matrix::Matrix::new(24, 80);
+                let mut matrix = matrix::Matrix::new(24, 80);
                 matrix.populate_from_aterm(&aterm);
                 update = Update::MatrixContent(matrix);
                 break;
@@ -138,17 +129,17 @@ fn update_loop(events: EventPollIterator) -> Update {
                 ..
             } => {
                 let backspace = "\x1B".to_string();
-                let mut aterm = ATERM.lock().unwrap();
+                let aterm = ATERM.lock().unwrap();
                 aterm.tx.notify(backspace.into_bytes());
-                let mut matrix = Matrix::Matrix::new(24, 80);
+                let mut matrix = matrix::Matrix::new(24, 80);
                 matrix.populate_from_aterm(&aterm);
                 update = Update::MatrixContent(matrix);
                 break;
             }
             Event::TextInput { text, .. } => {
-                let mut aterm = ATERM.lock().unwrap();
+                let aterm = ATERM.lock().unwrap();
                 aterm.tx.notify(text.into_bytes());
-                let mut matrix = Matrix::Matrix::new(24, 80);
+                let mut matrix = matrix::Matrix::new(24, 80);
                 matrix.populate_from_aterm(&aterm);
                 update = Update::MatrixContent(matrix);
                 break;
@@ -163,9 +154,9 @@ fn update_loop(events: EventPollIterator) -> Update {
                         if key_char >= 'A' && key_char <= 'Z' {
                             let ctrl_char = ((key_char as u8) - ('A') as u8) + 1;
                             let ctrl_char = (ctrl_char as char).to_string();
-                            let mut aterm = ATERM.lock().unwrap();
+                            let aterm = ATERM.lock().unwrap();
                             aterm.tx.notify(ctrl_char.into_bytes());
-                            let mut matrix = Matrix::Matrix::new(24, 80);
+                            let mut matrix = matrix::Matrix::new(24, 80);
                             matrix.populate_from_aterm(&aterm);
                             update = Update::MatrixContent(matrix);
                             break;
@@ -183,7 +174,7 @@ fn update_loop(events: EventPollIterator) -> Update {
 }
 
 fn main() -> Result<(), String> {
-    let mut term_display = TermDisplay::TermDisplay::new()?;
+    let mut term_display = term_display::TermDisplay::new()?;
     // let mut term = ATerm::ATerm::new();
     term_display.update_loop(update_loop, check_for_term_update)?;
     Ok(())
