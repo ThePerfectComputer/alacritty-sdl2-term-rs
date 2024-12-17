@@ -175,7 +175,6 @@ fn update_loop(events: EventPollIterator) -> Update {
 
 fn main() -> Result<(), String> {
     let mut term_display = term_display::TermDisplay::new()?;
-    // let mut term = ATerm::ATerm::new();
     term_display.update_loop(update_loop, check_for_term_update)?;
     Ok(())
 }
