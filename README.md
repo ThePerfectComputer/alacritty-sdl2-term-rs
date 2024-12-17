@@ -29,9 +29,19 @@ Using `alacritty` as the backend provides several advantages:
 # Status
 Screen content toggles when you press space.
 
-# MacOS
+# Building
+## MacOS
 ```bash
 brew install sdl2 sld2_ttf
+cargo run
+```
+
+## Ubuntu
+```bash
+apt install libsdl2-ttf-dev libsdl2-dev libclang-dev clang pkg-config curl build-essential -y
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+git clone https://github.com/ThePerfectComputer/alacritty-sdl2-term-rs.git
+cd alacritty-sdl2-term-rs
 cargo run
 ```
 
