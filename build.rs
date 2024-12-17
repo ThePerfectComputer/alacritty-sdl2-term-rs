@@ -4,16 +4,6 @@ use std::path::PathBuf;
 fn main() {
     pkg_config::probe_library("sdl2").unwrap();
 
-    // Tell cargo to tell rustc to link the libvterm library
-    println!("cargo:rustc-link-lib=vterm");
-
-    let lib_path = if cfg!(target_arch = "aarch64") {
-        "/opt/homebrew/lib"
-    } else {
-        "/usr/local/lib"
-    };
-    println!("cargo:rustc-link-search={}", lib_path);
-
     // Determine the correct include path based on the architecture
     let include_path = if cfg!(target_arch = "aarch64") {
         // Apple Silicon Macs
