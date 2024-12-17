@@ -1,9 +1,6 @@
 #![allow(non_camel_case_types)]
 
-use std::sync::OnceLock;
-
 use alacritty_terminal::event::Notify;
-use alacritty_terminal::term;
 use sdl2::event::EventPollIterator;
 use TermDisplay::Update;
 
@@ -11,7 +8,6 @@ mod ATerm;
 mod Matrix;
 mod TermDisplay;
 mod TerminalSize;
-mod TestVars;
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;

@@ -1,20 +1,11 @@
 use std::result;
 use std::sync::{mpsc, Arc};
 
-use alacritty_terminal::event::{Event, EventListener, Notify, OnResize, WindowSize};
-use alacritty_terminal::event_loop::{EventLoop, Msg, Notifier};
-use alacritty_terminal::grid::{Dimensions, Scroll};
-use alacritty_terminal::index::{Column, Direction, Line, Point, Side};
-use alacritty_terminal::selection::{
-    Selection, SelectionRange, SelectionType as AlacrittySelectionType,
-};
+use alacritty_terminal::event::{Event, EventListener, WindowSize};
+use alacritty_terminal::event_loop::{EventLoop, Notifier};
 use alacritty_terminal::sync::FairMutex;
-use alacritty_terminal::term::search::{Match, RegexIter, RegexSearch};
-use alacritty_terminal::term::{
-    self, cell::Cell, test::TermSize, viewport_to_point, Term, TermMode,
-};
-use alacritty_terminal::tty::Pty;
-use alacritty_terminal::{tty, Grid};
+use alacritty_terminal::term::{self, Term};
+use alacritty_terminal::tty;
 
 use crate::TerminalSize;
 

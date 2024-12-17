@@ -21,11 +21,8 @@ static SDL2_TTF_CONTEXT: OnceLock<Sdl2TtfContext> = OnceLock::new();
 
 pub struct TermDisplay {
     sdl_context: Sdl,
-    video_subsystem: sdl2::VideoSubsystem,
-    ttf_context: &'static Sdl2TtfContext,
     font: Font<'static, 'static>,
     canvas: Canvas<Window>,
-    matrix: Matrix,
 }
 
 pub enum Update {
@@ -64,15 +61,11 @@ impl TermDisplay {
             .build()
             .map_err(|e| e.to_string())?;
         let mut matrix = Matrix::new(NUM_ROWS, NUM_COLS);
-        matrix.set_to_content2();
 
         Ok(TermDisplay {
             sdl_context,
-            video_subsystem,
-            ttf_context,
             font,
             canvas,
-            matrix,
         })
     }
 

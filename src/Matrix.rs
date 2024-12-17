@@ -1,5 +1,4 @@
 use crate::ATerm::ATerm;
-use crate::TestVars::{CONTENT1, CONTENT2};
 // data structure for terminal display
 pub struct Matrix {
     rows: u32,
@@ -65,13 +64,5 @@ impl Matrix {
                 }
             }
         }
-    }
-
-    pub fn set_to_content1(&mut self) {
-        self.populate_from_string(CONTENT1);
-    }
-
-    pub fn set_to_content2(&mut self) {
-        self.populate_from_string(CONTENT2);
     }
 }
